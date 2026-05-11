@@ -1,0 +1,50 @@
+from math import gcd
+from functools import total_ordering
+
+@total_ordering
+class PhanSo:
+    def __init__(self, tu: int, mau: int):
+        if mau == 0:
+            raise MauSoBangKhong("Mẫu số không được bằng 0!")
+      
+        ucln = gcd(tu, mau)
+        self._tu = (tu // ucln)
+        self._mau = (mau // ucln)
+        
+        if self._mau < 0:
+            self._tu = -self._tu
+            self._mau = -self._mau
+
+    @property
+    def tu(self): return self._tu
+
+    @property
+    def mau(self): return self._mau
+
+    @mau.setter
+    def mau(self, value):
+        if value == 0: raise MauSoBangKhong("Mẫu số không được bằng 0!")
+        # Khởi tạo lại để tận dụng logic xử lý dấu/tối giản ở __init__
+        self.__init__(self._tu, value)
+
+    def __eq__(self, other):
+        if not isinstance(other, PhanSo): return NotImplemented
+        return self._tu * other._mau == other._tu * self._mau
+
+    def __lt__(self, other):
+        if not isinstance(other, PhanSo): return NotImplemented
+        return self._tu * other._mau < other._tu * self._mau
+
+    # --- TOÁN TỬ (Gọn hơn vì đã auto-tối giản ở __init__) ---
+    def __add__(self, other):
+        return PhanSo(self._tu * other._mau + other._tu * self._mau, 
+                      self._mau * other._mau)
+
+    def __mul__(self, other):
+        return PhanSo(self._tu * other._tu, self._mau * other._mau)
+
+    def __str__(self):
+        return f"{self._tu}" if self._mau == 1 else f"{self._tu}/{self._mau}"
+
+    def __hash__(self):
+        return hash((self._tu, self._mau))
